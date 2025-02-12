@@ -1,0 +1,6 @@
+server:
+  port: 28686
+
+spring:
+  application:
+    name: cesium-3dtiles-workout
