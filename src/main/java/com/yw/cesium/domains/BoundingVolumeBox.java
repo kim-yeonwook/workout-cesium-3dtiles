@@ -83,15 +83,13 @@ public class BoundingVolumeBox implements IBoundingVolume {
     }
 
     private double[][] transformHalfAxis(double[][] transform) {
-        double[][] halfAxis = new double[][] {
+        double[][] halfAxis = {
                 Arrays.copyOfRange(box, 3, 6),
                 Arrays.copyOfRange(box, 6, 9),
                 Arrays.copyOfRange(box, 9, 12)
         };
 
-        if (ObjectUtils.isEmpty(transform))
-            return halfAxis;
-
-        return CMatrix3.multiply(CMatrix4.getMatrix3(transform), halfAxis);
+        return ObjectUtils.isEmpty(transform) ? halfAxis
+                : CMatrix3.multiply(CMatrix4.getMatrix3(transform), halfAxis);
     }
 }

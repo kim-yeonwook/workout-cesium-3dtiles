@@ -5,7 +5,7 @@ import lombok.Data;
 
 @AllArgsConstructor
 @Data
-public class TilesetPolygonResDTO {
+public class TilesPolygonResponseDTO {
 
     private String polygon;
 }

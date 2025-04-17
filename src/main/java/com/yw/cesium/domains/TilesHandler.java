@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.yw.cesium.infrastructure.exception.InternalServerException;
 import org.geotools.filter.function.StaticGeometry;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
@@ -15,36 +16,40 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class Tileset3DHandler {
+public class TilesHandler {
 
     private final ObjectMapper mapper = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-    private int MAX_TILESET_DEPTH = 3;
+    private int TILES_MAX_DEPTH = 4;
 
-    private ICesiumTileset tileset;
+    private ICTiles tiles;
 
-    public Tileset3DHandler(String tilesetJson) throws JsonProcessingException {
-        init(tilesetJson);
+    public TilesHandler(String tilesJson) {
+        init(tilesJson);
     }
 
-    public Tileset3DHandler(String tilesetJson, int maxDepth) throws JsonProcessingException {
-        init(tilesetJson);
-        this.MAX_TILESET_DEPTH = maxDepth;
+    public TilesHandler(String tilesJson, int maxDepth) {
+        init(tilesJson);
+        this.TILES_MAX_DEPTH = maxDepth;
     }
 
-    private void init(String tilesetJson) throws JsonProcessingException {
-        JsonNode node = limitDepth(mapper.readTree(tilesetJson), 0);
-        this.tileset = mapper.readValue(mapper.writeValueAsString(node), Tileset3D.class);
+    private void init(String tilesJson) {
+        try {
+            JsonNode node = limitDepth(mapper.readTree(tilesJson), 0);
+            this.tiles = mapper.convertValue(node, Tiles3D.class);
+
+        } catch (JsonProcessingException jpe) {
+            throw new InternalServerException("Tiles Convert Object Fail. ", jpe);
+        }
     }
 
-    public String getTilesetType() {
-        return tileset.getRootBoundingVolumeType().name();
+    public String getTilesType() {
+        return tiles.getRootBoundingVolumeType().name();
     }
 
     public Geometry getPolygonConvexHull(int crs) {
-
-        List<Point> pointList = this.tileset.getTilesetPointList();
+        List<Point> pointList = this.tiles.getTilesetPointList();
 
         int size = pointList.size();
         GeometryFactory factory = new GeometryFactory();
@@ -61,11 +66,11 @@ public class Tileset3DHandler {
     }
 
     public List<Point> getPointList() {
-        return this.tileset.getTilesetPointList();
+        return this.tiles.getTilesetPointList();
     }
 
     private JsonNode limitDepth(JsonNode node, int currentDepth) {
-        if (currentDepth > MAX_TILESET_DEPTH) {
+        if (currentDepth > TILES_MAX_DEPTH) {
             return null;
         }
 

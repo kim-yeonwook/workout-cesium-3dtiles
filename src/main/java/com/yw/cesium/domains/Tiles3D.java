@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 @Getter
-public class Tileset3D implements ICesiumTileset {
+public class Tiles3D implements ICTiles {
 
     private Map<String, Object> asset;
 
